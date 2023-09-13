@@ -11,20 +11,18 @@
 const int TH = 120;
 
 // Function to invert pixels of an image (negative)
-void invert(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS])
+void invert(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH])
 {
   for (int x = 0; x < BMP_WIDTH; x++)
   {
     for (int y = 0; y < BMP_HEIGTH; y++)
     {
-      output_image[x][y][0] = (input_image[x][y][0] + input_image[x][y][1] + input_image[x][y][2]) / 3;
-      output_image[x][y][1] = (input_image[x][y][0] + input_image[x][y][1] + input_image[x][y][2]) / 3;
-      output_image[x][y][2] = (input_image[x][y][0] + input_image[x][y][1] + input_image[x][y][2]) / 3;
+      output_image[x][y] = (input_image[x][y][0] + input_image[x][y][1] + input_image[x][y][2]) / 3;
     }
   }
 }
 
-void convertToBinary(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS])
+void convertToBinary(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH])
 {
   for (int x = 0; x < BMP_WIDTH; x++)
   {
@@ -32,15 +30,11 @@ void convertToBinary(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANN
     {
       if (output_image[x][y] <= TH)
       {
-        output_image[x][y][0] = 0;
-        output_image[x][y][1] = 0;
-        output_image[x][y][2] = 0;
+        output_image[x][y] = 0;
       }
       else
       {
-        output_image[x][y][0] = 255;
-        output_image[x][y][1] = 255;
-        output_image[x][y][2] = 255;
+        output_image[x][y] = 255;
       }
     }
   }
@@ -88,7 +82,7 @@ int main(int argc, char **argv)
 
   convertToBinary(output_image);
 
-  // converTo3D(output_image, input_image);
+  converTo3D(output_image, input_image);
 
   // Save image to file
   write_bitmap(output_image, argv[2]);
