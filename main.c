@@ -85,7 +85,7 @@ int main(int argc, char **argv)
   converTo3D(output_image, input_image);
 
   // Save image to file
-  write_bitmap(output_image, argv[2]);
+  write_bitmap(input_image, argv[2]);
 
   printf("Done!\n");
   return 0;
