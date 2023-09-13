@@ -23,7 +23,7 @@ void invert(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsi
   }
 }
 
-void convertToBinary(unsigned char *output_image[BMP_WIDTH][BMP_HEIGTH]){
+void convertToBinary(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH]){
   for (int x = 0; x < BMP_WIDTH; x++)
   {
     for (int y = 0; y < BMP_HEIGTH; y++)
@@ -31,7 +31,7 @@ void convertToBinary(unsigned char *output_image[BMP_WIDTH][BMP_HEIGTH]){
       if(output_image[x][y]<=TH){
         output_image[x][y]=0;
       }else{
-        output_image[x][y]=255;
+       output_image[x][y]=255;
       }
       
       
@@ -65,6 +65,8 @@ int main(int argc, char** argv)
 
   //Run inversion
   invert(input_image,output_image);
+
+  convertToBinary(output_image);
 
   //Save image to file
   write_bitmap(output_image, argv[2]);
