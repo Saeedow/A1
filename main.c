@@ -52,34 +52,43 @@ void converTo3D(unsigned char twoD[BMP_WIDTH][BMP_HEIGTH], unsigned char threeD[
     }
   }
 }
-int isCompleted(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH]){
-     for (int x = 0; x < BMP_WIDTH; x++)
-     {
-       for (int y = 0; y < BMP_HEIGTH; y++)
-        {
-          if(input_image[x][y]==255){
-            return 1;
-          }
-        }
-     }
-     return 0;
-
+int isCompleted(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
+{
+  for (int x = 0; x < BMP_WIDTH; x++)
+  {
+    for (int y = 0; y < BMP_HEIGTH; y++)
+    {
+      if (input_image[x][y] == 255)
+      {
+        return 1;
+      }
+    }
+  }
+  return 0;
 }
-void erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH]){
-     
-     do{
-     for (int x = 1; x < BMP_WIDTH-1; x++)
-     {
-       for (int y = 1; y < BMP_HEIGTH-1; y++)
-        { 
-          if()
-          if(input_image[x+1][y]==255 || input_image[x-1][y]==255 || input_image[x][y+1]==255 || input_image[x][y-1]==255){
-              input_image[x][y] = 0;
-          }
-    
+void erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
+{
+
+  int counter = 1;
+  do
+  {
+    for (int x = 1; x < BMP_WIDTH - 1; x++)
+    {
+      for (int y = 1; y < BMP_HEIGTH - 1; y++)
+      {
+
+        if (input_image[x + 1][y] == 255 && input_image[x - 1][y] == 255 && input_image[x][y + 1] == 255 && input_image[x][y - 1] == 255 && input_image[x][y - 1] == 255)
+        {
+          input_image[x][y] = 0;
         }
-     }
-     }while(isCompleted(input_image));
+      }
+    }
+
+    counter++;
+
+  } while (isCompleted(input_image));
+
+  printf("%d", counter);
 }
 
 // Declaring the array to store the image (unsigned char = unsigned 8 bit)
@@ -110,9 +119,10 @@ int main(int argc, char **argv)
   invert(input_image, output_image);
 
   convertToBinary(output_image);
-  
+
+  erode(output_image);
+
   converTo3D(output_image, input_image);
-  erode(input_image);
   // Save image to file
   write_bitmap(input_image, argv[2]);
 
