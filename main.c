@@ -75,7 +75,7 @@ int isCompleted(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
 void generateOutputImage(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int row, int col)
 {
 
-  for (int i = 0; i < 5; i++)
+  for (int i = 0; i < 100; i++)
   {
     input_image[row + i][col][0] = 255;
     input_image[row + i][col][1] = 0;
@@ -94,44 +94,14 @@ void generateOutputImage(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CH
 
 void cellDetection(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
 {
-
-  for (int row = 0; row < BMP_HEIGTH; row++)
+  for (int row = 0; row < BMP_WIDTH; row++)
   {
-    for (int col = 0; col < BMP_WIDTH; col++)
+    for (int col = 0; col < BMP_HEIGTH; col++)
     {
-      int whiteCount = 0;
-      int blackCount = 0;
-
       if (input_image[row][col] == 255)
       {
-
-        for (int i = -6; i < 6; i++)
+        if (row + 6 < BMP_HEIGTH && row - 6 <= 0 && row + 6 < BMP_HEIGTH && row - 6 <= 0 && col + 6 < BMP_HEIGTH && col - 6 <= 0 && col + 6 < BMP_HEIGTH && col - 6 <= 0)
         {
-          for (int j = -6; j < 6; j++)
-          {
-            if (row + i >= 0 && row + i < BMP_HEIGTH && col + j >= 0 && col + j < BMP_WIDTH)
-            {
-              if (input_image[row + i][col + j] == 255)
-              {
-                input_image[row + i][col + j] == 0;
-                input_image[row][col] == 0;
-                whiteCount++;
-              }
-            }
-          }
-        }
-
-        if (whiteCount > 0)
-        {
-          int exclusionBlack = 0;
-
-          if (row)
-
-            if (exclusionBlack == 52)
-            {
-              generateOutputImage(iinput_image, row, col);
-              exclusionBlack = 0;
-            }
         }
       }
     }
@@ -268,7 +238,7 @@ int main(int argc, char **argv)
 
   erode(output_image);
 
-  // converTo3D(output_image, input_image);
+  // converTo3D(output_image, iinput_image);
 
   // Save image to file
   write_bitmap(iinput_image, argv[2]);
