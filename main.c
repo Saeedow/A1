@@ -8,17 +8,22 @@
 #include <stdio.h>
 #include "cbmp.h"
 #include <time.h>
-#include <stdbool.h>
 
 const int TH = 120;
 clock_t start, end;
 double cpu_time_used;
 // Declaring the arracol to store the image (unsigned char = unsigned 8 bit)
 unsigned char iinput_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
-bool output_image[BMP_WIDTH][BMP_HEIGTH];
+unsigned char output_image[BMP_WIDTH][BMP_HEIGTH];
+
+// otsu method for threshold
+
+void otsuCriteria(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int th)
+{
+}
 
 // Function to invert pirowels of an image (negative)
-void invert(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], bool output_image[BMP_WIDTH][BMP_HEIGTH])
+void invertAndConvertToBinaryColors(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH])
 {
   for (int row = 0; row < BMP_WIDTH; row++)
   {
@@ -50,21 +55,6 @@ void converTo3D(unsigned char twoD[BMP_WIDTH][BMP_HEIGTH], unsigned char threeD[
   }
 }
 
-int isCompleted(bool input_image[BMP_WIDTH][BMP_HEIGTH])
-{
-  for (int row = 0; row < BMP_WIDTH; row++)
-  {
-    for (int col = 0; col < BMP_HEIGTH; col++)
-    {
-      if (input_image[row][col] == 1)
-      {
-        return 1;
-      }
-    }
-  }
-  return 0;
-}
-
 void generateOutputImage(int row, int col)
 {
 
@@ -85,7 +75,7 @@ void generateOutputImage(int row, int col)
   }
 }
 
-void cellDetection(bool input_image[BMP_WIDTH][BMP_HEIGTH])
+void cellDetection(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
 {
   for (int row = 0; row < BMP_HEIGTH; row++)
   {
@@ -142,7 +132,24 @@ void cellDetection(bool input_image[BMP_WIDTH][BMP_HEIGTH])
     }
   }
 }
-void erode(bool input_image[BMP_WIDTH][BMP_HEIGTH])
+
+int isCompleted(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
+{
+  for (int row = 0; row < BMP_WIDTH; row++)
+  {
+    for (int col = 0; col < BMP_HEIGTH; col++)
+    {
+      if (input_image[row][col] == 1)
+      {
+        cellDetection(input_image);
+        return 1;
+      }
+    }
+  }
+  return 0;
+}
+
+void erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
 {
   while (isCompleted(input_image))
   {
@@ -150,93 +157,20 @@ void erode(bool input_image[BMP_WIDTH][BMP_HEIGTH])
     {
       for (int col = 0; col < BMP_HEIGTH; col++)
       {
-        // top left
         if (input_image[row][col] == 1)
         {
-          if (row == 0 && col == 0)
+          for (int i = -1; i <= 1; i++)
           {
-            if (input_image[row + 1][col] == 0 || input_image[row][col + 1] == 0)
+            for (int j = -1; j <= 1; j++)
             {
-              input_image[row][col] = 0;
-              continue;
+              if (row + i >= 0 && row + i <= BMP_HEIGTH && col + j >= 0 && col + j <= BMP_WIDTH && (input_image[row + i][col] == 0 || input_image[row][col + j] == 0))
+              {
+                input_image[row][col] = 0;
+              }
             }
-          }
-          // top right
-          if (row == 0 && col == BMP_WIDTH)
-          {
-            if (input_image[row + 1][col] == 0 || input_image[row][col - 1] == 0)
-            {
-              input_image[row][col] = 0;
-              continue;
-            }
-          }
-          // bottom left
-          if (row == BMP_HEIGTH && col == 0)
-          {
-            if (input_image[row - 1][col] == 0 || input_image[row][col + 1] == 0)
-            {
-              input_image[row][col] = 0;
-              continue;
-            }
-          }
-          // bottom right
-          if (row == BMP_HEIGTH && col == BMP_WIDTH)
-          {
-            if (input_image[row - 1][col] == 0 || input_image[row][col - 1] == 0)
-            {
-              input_image[row][col] = 0;
-              continue;
-            }
-          }
-
-          // first row
-          if (row == 0 && col > 0 && col < BMP_WIDTH)
-          {
-            if (input_image[row + 1][col] == 0 || input_image[row][col - 1] == 0 || input_image[row][col + 1] == 0)
-            {
-              input_image[row][col] = 0;
-              continue;
-            }
-          }
-
-          // last row
-
-          if (row == BMP_HEIGTH && col > 0 && col < BMP_WIDTH)
-          {
-            if (input_image[row - 1][col] == 0 || input_image[row][col - 1] == 0 || input_image[row][col + 1] == 0)
-            {
-              input_image[row][col] = 0;
-              continue;
-            }
-          }
-
-          // first column
-          if (col == 0 && row > 0 && row < BMP_HEIGTH)
-          {
-            if (input_image[row - 1][col] == 0 || input_image[row][col + 1] == 0 || input_image[row + 1][col] == 0)
-            {
-              input_image[row][col] = 0;
-              continue;
-            }
-          }
-          // last column
-          if (col == BMP_HEIGTH && row > 0 && row < BMP_HEIGTH)
-          {
-            if (input_image[row - 1][col] == 0 || input_image[row + 1][col] == 0 || input_image[row][col - 1] == 0)
-            {
-              input_image[row][col] = 0;
-              continue;
-            }
-          }
-
-          if (input_image[row + 1][col] == 0 || input_image[row - 1][col] == 0 || input_image[row][col + 1] == 0 || input_image[row][col - 1] == 0)
-          {
-            input_image[row][col] = 0;
-            continue;
           }
         }
       }
-      cellDetection(input_image);
     }
   }
 }
@@ -261,7 +195,7 @@ int main(int argc, char **argv)
   read_bitmap(argv[1], iinput_image);
 
   // Run inversion
-  invert(iinput_image, output_image);
+  invertAndConvertToBinaryColors(iinput_image, output_image);
 
   start = clock();
 
