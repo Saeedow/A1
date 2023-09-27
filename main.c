@@ -9,7 +9,7 @@
 #include "cbmp.h"
 #include <time.h>
 
-const int TH = 120;
+const int TH = 130;
 clock_t start, end;
 double cpu_time_used;
 // Declaring the arracol to store the image (unsigned char = unsigned 8 bit)
@@ -17,7 +17,6 @@ unsigned char iinput_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 unsigned char output_image[BMP_WIDTH][BMP_HEIGTH];
 
 // otsu method for threshold
-
 void otsuCriteria(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int th)
 {
 }
@@ -57,6 +56,7 @@ void converTo3D(unsigned char twoD[BMP_WIDTH][BMP_HEIGTH], unsigned char threeD[
 
 void generateOutputImage(int row, int col)
 {
+  // printf("the row is: %d,  the col: %d \n ", row, col);
 
   for (int i = 0; i <= 2; i++)
   {
@@ -91,16 +91,20 @@ void cellDetection(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
           {
             if (row + i >= 0 && row + i < BMP_HEIGTH && col + j >= 0 && col + j < BMP_WIDTH)
             {
-              int exclusionFrameClear = 1;
-              for (int x = -1; x <= 1; x++)
+
+              if (input_image[row + i][col + j] == 1)
               {
-                for (int y = -1; y <= 1; y++)
+                int exclusionFrameClear = 1;
+                for (int x = -1; x <= 1; x++)
                 {
-                  if (row + i + x >= 0 && row + i + x < BMP_HEIGTH && col + i + y >= 0 && col + i + y < BMP_WIDTH &&
-                      input_image[row + i + x][col + i + y] != 0)
+                  for (int y = -1; y <= 1; y++)
                   {
-                    exclusionFrameClear = 0;
-                    break;
+                    if (row + i + x >= 0 && row + i + x < BMP_HEIGTH && col + i + y >= 0 && col + i + y < BMP_WIDTH &&
+                        input_image[row + i + x][col + i + y] != 0)
+                    {
+                      exclusionFrameClear = 0;
+                      break;
+                    }
                   }
                 }
 
@@ -112,13 +116,14 @@ void cellDetection(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
                   {
                     for (int y = -6; y <= 5; y++)
                     {
-                      if (row + i + x >= 0 && row + i + x < BMP_HEIGTH && col + j + y >= 0 && col + j + y < BMP_WIDTH)
+                      if (row + i + x >= 0 && row + i + x <= BMP_HEIGTH && col + j + y >= 0 && col + j + y <= BMP_WIDTH)
                       {
                         input_image[row + i + x][col + j + y] = 0;
                       }
                     }
                   }
                 }
+                exclusionFrameClear = 0;
               }
             }
           }
@@ -163,7 +168,7 @@ void erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
           {
             for (int j = -1; j <= 1; j++)
             {
-              if (row + i >= 0 && row + i <= BMP_HEIGTH && col + j >= 0 && col + j <= BMP_WIDTH && (input_image[row + i][col] == 0 || input_image[row][col + j] == 0))
+              if (row + i >= 0 && row + i <= BMP_HEIGTH && col + j >= 0 && col + j <= BMP_WIDTH && (input_image[row + i][col - j] == 0 || input_image[row][col + j] == 0))
               {
                 input_image[row][col] = 0;
               }
