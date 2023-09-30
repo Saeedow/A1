@@ -18,7 +18,7 @@ unsigned char iinput_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 unsigned char output_image[BMP_WIDTH][BMP_HEIGTH];
 
 // otsu method for threshold
-int calculateThreshold(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS])
+int calculateThreshold(unsigned char (*input_image)[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS])
 {
   int histogram[256] = {0};
   int total_pixels = BMP_WIDTH * BMP_HEIGTH;
@@ -29,7 +29,7 @@ int calculateThreshold(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHAN
   {
     for (int col = 0; col < BMP_HEIGTH; col++)
     {
-      int brightness = (input_image[row][col][0] + input_image[row][col][1] + input_image[row][col][2]) / 3;
+      int brightness = ((*input_image)[row][col][0] + (*input_image)[row][col][1] + (*input_image)[row][col][2]) / 3;
       histogram[brightness]++;
       sum += brightness;
     }
@@ -76,20 +76,20 @@ int calculateThreshold(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHAN
 
 
 // Function to invert pirowels of an image (negative)
-void invertAndConvertToBinaryColors(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH])
+void invertAndConvertToBinaryColors(unsigned char (*input_image)[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char (*output_image)[BMP_WIDTH][BMP_HEIGTH])
 {
   TH=calculateThreshold(input_image);
   for (int row = 0; row < BMP_WIDTH; row++)
   {
     for (int col = 0; col < BMP_HEIGTH; col++)
     {
-      if ((input_image[row][col][0] + input_image[row][col][1] + input_image[row][col][2]) / 3 <= TH)
+      if (((*input_image)[row][col][0] + (*input_image)[row][col][1] + (*input_image)[row][col][2]) / 3 <= TH)
       {
-        output_image[row][col] = 0;
+        (*output_image)[row][col] = 0;
       }
       else
       {
-        output_image[row][col] = 1;
+        (*output_image)[row][col] = 1;
       }
     }
   }
@@ -129,7 +129,7 @@ void generateOutputImage(int row, int col)
   }
 }
 
-void cellDetection(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
+void cellDetection(unsigned char (*input_image)[BMP_WIDTH][BMP_HEIGTH])
 {
   int exclusionFrameClear = 0;
   int cellDetected = 0;
@@ -140,7 +140,7 @@ void cellDetection(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
     {
       int cellDetected = 0;
 
-      if (input_image[row][col] == 1)
+      if ((*input_image)[row][col] == 1)
       {
         for (int i = -6; i <= 6; i++)
         {
@@ -149,13 +149,13 @@ void cellDetection(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
             if (row + i >= 0 && row + i <= BMP_HEIGTH && col + j >= 0 && col + j <= BMP_WIDTH)
             {
 
-              if (input_image[row + i][col + j] == 1)
+              if ((*input_image)[row + i][col + j] == 1)
               {
                 exclusionFrameClear = 1;
 
                 for (int a = 1; a <= 14; a++)
                 {
-                  if (input_image[row - 7][col - 7 + a] != 0 || input_image[row - 7 + a][col + 7] != 0 || input_image[row - 7 + a][col - 7] != 0 || input_image[row + 7][col - 7 + a] != 0)
+                  if ((*input_image)[row - 7][col - 7 + a] != 0 || (*input_image)[row - 7 + a][col + 7] != 0 || (*input_image)[row - 7 + a][col - 7] != 0 || (*input_image)[row + 7][col - 7 + a] != 0)
                   {
                     exclusionFrameClear = 0;
                   }
@@ -176,7 +176,7 @@ void cellDetection(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
             {
               if (row + x >= 0 && row + x <= BMP_HEIGTH && col + y >= 0 && col + y <= BMP_WIDTH)
               {
-                input_image[row + x][col + y] = 0;
+                (*input_image)[row + x][col + y] = 0;
               }
             }
           }
@@ -195,15 +195,15 @@ void cellDetection(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
   }
 }
 
-int isCompleted(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
+int isCompleted(unsigned char (*input_image)[BMP_WIDTH][BMP_HEIGTH])
 {
   for (int row = 0; row < BMP_WIDTH; row++)
   {
     for (int col = 0; col < BMP_HEIGTH; col++)
     {
-      if (input_image[row][col] == 1)
+      if ((*input_image)[row][col] == 1)
       {
-        cellDetection(input_image);
+        cellDetection((input_image));
         return 1;
       }
     }
@@ -211,7 +211,7 @@ int isCompleted(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
   return 0;
 }
 
-void erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH])
+void erode(unsigned char (*input_image)[BMP_WIDTH][BMP_HEIGTH], unsigned char (*output_image)[BMP_WIDTH][BMP_HEIGTH])
 {
 
   do
@@ -221,19 +221,19 @@ void erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH], unsigned char outpu
     {
       for (int col = 0; col < BMP_HEIGTH; col++)
       {
-        if (input_image[row][col] == 1)
+        if ((*input_image)[row][col] == 1)
         {
           for (int i = -1; i <= 1; i++)
           {
             for (int j = -1; j <= 1; j++)
             {
-              if (row + i >= 0 && row + i <= BMP_HEIGTH && col + j >= 0 && col + j <= BMP_WIDTH && (input_image[row + i][col  ] == 0 || input_image[row][col + j] == 0))
+              if (row + i >= 0 && row + i <= BMP_HEIGTH && col + j >= 0 && col + j <= BMP_WIDTH && ((*input_image)[row + i][col  ] == 0 || (*input_image)[row][col + j] == 0))
               {
-                output_image[row][col] = 0;
+                (*output_image)[row][col] = 0;
               }
               else
               {
-                output_image[row][col] = 1;
+                (*output_image)[row][col] = 1;
               }
             }
           }
@@ -264,11 +264,11 @@ int main(int argc, char **argv)
   read_bitmap(argv[1], iinput_image);
 
   // Run inversion
-  invertAndConvertToBinaryColors(iinput_image, output_image);
+  invertAndConvertToBinaryColors(&iinput_image, &output_image);
 
   start = clock();
 
-  erode(output_image, output_image);
+  erode(&output_image, &output_image);
   end = clock();
 
   // converTo3D(output_image, iinput_image);
