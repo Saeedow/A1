@@ -9,7 +9,7 @@
 #include "cbmp.h"
 #include <time.h>
 
-const int TH = 150;
+int TH ;
 clock_t start, end;
 double cpu_time_used;
 int cells = 0;
@@ -18,13 +18,67 @@ unsigned char iinput_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
 unsigned char output_image[BMP_WIDTH][BMP_HEIGTH];
 
 // otsu method for threshold
-void otsuCriteria(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], int th)
+int calculateThreshold(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS])
 {
+  int histogram[256] = {0};
+  int total_pixels = BMP_WIDTH * BMP_HEIGTH;
+  int sum = 0;
+
+  // Calculate histogram
+  for (int row = 0; row < BMP_WIDTH; row++)
+  {
+    for (int col = 0; col < BMP_HEIGTH; col++)
+    {
+      int brightness = (input_image[row][col][0] + input_image[row][col][1] + input_image[row][col][2]) / 3;
+      histogram[brightness]++;
+      sum += brightness;
+    }
+  }
+
+  int max_variance = -1;
+  int threshold = 0;
+
+  for (int t = 0; t < 256; t++)
+  {
+    int w1 = 0;
+    int w2 = 0;
+    int sum1 = 0;
+    int sum2 = 0;
+
+    for (int i = 0; i < t; i++)
+    {
+      w1 += histogram[i];
+      sum1 += i * histogram[i];
+    }
+
+    for (int i = t; i < 256; i++)
+    {
+      w2 += histogram[i];
+      sum2 += i * histogram[i];
+    }
+
+    if (w1 == 0 || w2 == 0)
+      continue;
+
+    int mean1 = sum1 / w1;
+    int mean2 = sum2 / w2;
+    int variance = w1 * w2 * (mean1 - mean2) * (mean1 - mean2) / (w1 + w2);
+
+    if (variance > max_variance)
+    {
+      max_variance = variance;
+      threshold = t;
+    }
+  }
+
+  return threshold;
 }
+
 
 // Function to invert pirowels of an image (negative)
 void invertAndConvertToBinaryColors(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH])
 {
+  TH=calculateThreshold(input_image);
   for (int row = 0; row < BMP_WIDTH; row++)
   {
     for (int col = 0; col < BMP_HEIGTH; col++)
