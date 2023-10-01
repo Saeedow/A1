@@ -80,15 +80,15 @@ int calculateThreshold(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHAN
 }
 
 // Function to invert pirowels of an image (negative)
-void invertAndConvertToBinaryColors(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH])
+void invertAndConvertToBinaryColors(unsigned char (*input_image)[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH])
 {
-  TH = calculateThreshold(input_image);
+  TH = calculateThreshold(*input_image);
   // converting to grey-scale using the calculated TH
   for (int row = 0; row < BMP_WIDTH; row++)
   {
     for (int col = 0; col < BMP_HEIGTH; col++)
     {
-      if ((input_image[row][col][0] + input_image[row][col][1] + input_image[row][col][2]) / 3 <= TH)
+      if (( (*input_image)[row][col][0] +  (*input_image)[row][col][1] +  (*input_image)[row][col][2]) / 3 <= TH)
       {
         output_image[row][col] = 0;
       }
@@ -242,7 +242,7 @@ int isCompleted(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
   return 0;
 }
 
-void erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH])
+void erode(unsigned char  (*input_image)[BMP_WIDTH][BMP_HEIGTH], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH])
 {
   // initializing the structual element
   int frameSize = 5;
@@ -261,7 +261,7 @@ void erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH], unsigned char outpu
       for (int col = 0; col < BMP_HEIGTH; col++)
       {
         // run the erosion algorithm
-        if (input_image[row][col] == 1)
+        if ( (*input_image)[row][col] == 1)
         {
           for (int i = -frameSize / 2; i <= frameSize / 2; i++)
           {
@@ -271,7 +271,7 @@ void erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH], unsigned char outpu
               {
                 if (structuringElement[i + frameSize / 2][j + frameSize / 2] == 1)
                 {
-                  if (input_image[row + i][col + j] == 0)
+                  if ( (*input_image)[row + i][col + j] == 0)
                   {
                     output_image[row][col] = 0;
                   }
@@ -309,18 +309,20 @@ int main(int argc, char **argv)
   // Load image from file
   read_bitmap(argv[1], iinput_image);
 
-  // Run inversion
-  invertAndConvertToBinaryColors(iinput_image, output_image);
+  unsigned char (*pInput_image)[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS] = &iinput_image;
 
+  // Run inversion
+  invertAndConvertToBinaryColors(pInput_image, output_image);
+  unsigned char (*pOutput_image)[BMP_WIDTH][BMP_HEIGTH] = &output_image;
   start = clock();
 
-  erode(output_image, output_image);
+  erode(pOutput_image, output_image);
   end = clock();
 
   // converTo3D(output_image, iinput_image);
 
   // Save image to file
-  write_bitmap(iinput_image, argv[2]);
+  write_bitmap(*pInput_image, argv[2]);
 
   printf("Done!\n");
 
