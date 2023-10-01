@@ -180,7 +180,7 @@ void cellDetection(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
         {
           for (int j = -frameSize / 2; j <= frameSize / 2; j++)
           {
-            if (row + i >= 0 && row + i <= BMP_HEIGTH && col + j >= 0 && col + j <= BMP_WIDTH)
+            if (row + i >= 0 && row + i < BMP_HEIGTH && col + j >= 0 && col + j < BMP_WIDTH)
             {
               if (input_image[row + i][col + j] == 1 && structuringElement[i + frameSize / 2][j + frameSize / 2] == 0)
               {
@@ -206,7 +206,7 @@ void cellDetection(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
           {
             for (int j = -frameSize / 2; j <= frameSize / 2; j++)
             {
-              if (row + i >= 0 && row + i <= BMP_HEIGTH && col + j >= 0 && col + j <= BMP_WIDTH)
+              if (row + i >= 0 && row + i < BMP_HEIGTH && col + j >= 0 && col + j < BMP_WIDTH)
               {
                 input_image[row + i][col + j] = 0;
               }
@@ -217,7 +217,7 @@ void cellDetection(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
         if (cellDetected)
         {
           printf("Cell detected at row: %d, col: %d\n", row, col);
-          generateOutputImage(row + 5, col - 2);
+          generateOutputImage(row , col );
         }
       }
     }
