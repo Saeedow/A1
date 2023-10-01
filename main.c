@@ -144,6 +144,7 @@ void generateOutputImage(int row, int col)
 
 void cellDetection(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
 {
+  //Structuring element initialized
   int frameSize = 18;
   int structuringElement[18][18] = {
       {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -165,6 +166,7 @@ void cellDetection(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
       {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
       {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
 
+  //loop through the image until we find a white pixel
   for (int row = 0; row < BMP_HEIGTH; row++)
   {
     for (int col = 0; col < BMP_WIDTH; col++)
@@ -174,7 +176,7 @@ void cellDetection(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
       if (input_image[row][col] == 1)
       {
         int exclusionFrameClear = 1;
-
+        //loop through detection and exclusion frame
         for (int i = -frameSize / 2; i <= frameSize / 2; i++)
         {
           for (int j = -frameSize / 2; j <= frameSize / 2; j++)
@@ -183,18 +185,20 @@ void cellDetection(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
             {
               if (input_image[row + i][col + j] == 1 && structuringElement[i + frameSize / 2][j + frameSize / 2] == 0)
               {
+
                 exclusionFrameClear = 0;
                 break;
               }
             }
           }
+
           // break out of the outer loop
           if (exclusionFrameClear == 0)
           {
             break;
           }
         }
-
+        //Invert the pixels in the detectionframe
         if (exclusionFrameClear)
         {
           cellDetected = 1;
