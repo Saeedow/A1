@@ -29,8 +29,9 @@ int calculateThreshold(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHAN
   {
     for (int col = 0; col < BMP_HEIGTH; col++)
     {
+      // Calculate brightness as the average of the RGB channels
       int brightness = (input_image[row][col][0] + input_image[row][col][1] + input_image[row][col][2]) / 3;
-      histogram[brightness]++;
+      histogram[brightness]=histogram[brightness]+1 ;
       sum += brightness;
     }
   }
@@ -38,7 +39,8 @@ int calculateThreshold(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHAN
   int max_variance = -1;
   int threshold = 0;
 
-  for (int t = 0; t < 256; t++)
+  // Calculate sums and counts for two classes: pixels below and above the threshold
+  for (int t = 70; t < 160; t++)
   {
     int w1 = 0;
     int w2 = 0;
@@ -57,9 +59,11 @@ int calculateThreshold(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHAN
       sum2 += i * histogram[i];
     }
 
-    if (w1 == 0 || w2 == 0)
+    if (w1 == 0 || w2 == 0){
       continue;
+    }
 
+    // Calculate means and variance between the two classes
     int mean1 = sum1 / w1;
     int mean2 = sum2 / w2;
     int variance = w1 * w2 * (mean1 - mean2) * (mean1 - mean2) / (w1 + w2);
@@ -79,6 +83,7 @@ int calculateThreshold(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHAN
 void invertAndConvertToBinaryColors(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH])
 {
   TH=calculateThreshold(input_image);
+  //converting to grey-scale using the calculated TH
   for (int row = 0; row < BMP_WIDTH; row++)
   {
     for (int col = 0; col < BMP_HEIGTH; col++)
@@ -94,7 +99,8 @@ void invertAndConvertToBinaryColors(unsigned char input_image[BMP_WIDTH][BMP_HEI
     }
   }
 }
-
+/*
+We used this in the beginning to view if the grey-scale/erosion worked
 void converTo3D(unsigned char twoD[BMP_WIDTH][BMP_HEIGTH], unsigned char threeD[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS])
 {
   for (int row = 0; row < BMP_WIDTH; row++)
@@ -108,32 +114,41 @@ void converTo3D(unsigned char twoD[BMP_WIDTH][BMP_HEIGTH], unsigned char threeD[
     }
   }
 }
+*/
 
 void generateOutputImage(int row, int col)
 {
   cells++;
-  for (int i = 0; i <= 6; i++)
+ //draw the plus signs on the gived row/col
+
+  for (int i = -6; i <= 6; i++)
   {
-    iinput_image[row + i][col][0] = 255;
-    iinput_image[row + i][col][1] = 0;
-    iinput_image[row + i][col][2] = 0;
-    iinput_image[row - i][col][0] = 255;
-    iinput_image[row - i][col][1] = 0;
-    iinput_image[row - i][col][2] = 0;
-    iinput_image[row][col + i][0] = 255;
-    iinput_image[row][col + i][1] = 0;
-    iinput_image[row][col + i][2] = 0;
-    iinput_image[row][col - i][0] = 255;
-    iinput_image[row][col - i][1] = 0;
-    iinput_image[row][col - i][2] = 0;
+    if (row + i >= 0 && row + i < BMP_HEIGTH && col >= 0 && col < BMP_WIDTH)
+    {
+      iinput_image[row + i][col][0] = 255;
+      iinput_image[row + i][col][1] = 0;
+      iinput_image[row + i][col][2] = 0;
+    }
+  }
+
+
+  for (int i = -6; i <= 6; i++)
+  {
+    if (row >= 0 && row < BMP_HEIGTH && col + i >= 0 && col + i < BMP_WIDTH)
+    {
+      iinput_image[row][col + i][0] = 255;
+      iinput_image[row][col + i][1] = 0;
+      iinput_image[row][col + i][2] = 0;
+    }
   }
 }
 
 void cellDetection(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
 {
+  //boolean set to false
   int exclusionFrameClear = 0;
   int cellDetected = 0;
-
+  //loop through the image until we find a white pixel
   for (int row = 0; row < BMP_HEIGTH; row++)
   {
     for (int col = 0; col < BMP_WIDTH; col++)
@@ -142,13 +157,14 @@ void cellDetection(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
 
       if (input_image[row][col] == 1)
       {
+        //looping through the detection frame 
         for (int i = -6; i <= 6; i++)
         {
           for (int j = -6; j <= 6; j++)
           {
             if (row + i >= 0 && row + i <= BMP_HEIGTH && col + j >= 0 && col + j <= BMP_WIDTH)
             {
-
+              //if there is any white pixels we check the exclusion frame
               if (input_image[row + i][col + j] == 1)
               {
                 exclusionFrameClear = 1;
@@ -166,6 +182,7 @@ void cellDetection(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
             }
           }
         }
+        //invert the pixels in the detection frame
         if (exclusionFrameClear)
         {
           cellDetected = 1;
@@ -182,12 +199,12 @@ void cellDetection(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
           }
         }
         exclusionFrameClear = 0;
-
+        //draw the + sign on the detected cells
         if (cellDetected)
         {
           
           printf("the row is: %d,  the col: %d \n ", row, col);
-          generateOutputImage(row, col);
+          generateOutputImage(row+5, col-2);
           
         }
       }
@@ -197,6 +214,7 @@ void cellDetection(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
 
 int isCompleted(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
 {
+  //looping through the image to check if there are any white pixels
   for (int row = 0; row < BMP_WIDTH; row++)
   {
     for (int col = 0; col < BMP_HEIGTH; col++)
@@ -213,34 +231,50 @@ int isCompleted(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
 
 void erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH])
 {
+  //initializing the structual element 
+int structuringElement[5][5] = {
+  {0, 1, 1, 1, 0},
+  {1, 1, 1, 1, 1},
+  {1, 1, 1, 1, 1},
+  {1, 1, 1, 1, 1},
+  {0, 1, 1, 1, 0}
+};
+
+
 
   do
   {
-
+    //look for white pixels
     for (int row = 0; row < BMP_WIDTH; row++)
     {
       for (int col = 0; col < BMP_HEIGTH; col++)
       {
+        //run the erosion algorithm 
         if (input_image[row][col] == 1)
         {
-          for (int i = -1; i <= 1; i++)
+          for (int i = -2; i <= 2; i++)
           {
-            for (int j = -1; j <= 1; j++)
+            for (int j = -2; j <= 2; j++)
             {
-              if (row + i >= 0 && row + i <= BMP_HEIGTH && col + j >= 0 && col + j <= BMP_WIDTH && (input_image[row + i][col  ] == 0 || input_image[row][col + j] == 0))
+              if (row + i >= 0 && row + i < BMP_WIDTH && col + j >= 0 && col + j < BMP_HEIGTH)
               {
-                output_image[row][col] = 0;
-              }
-              else
-              {
-                output_image[row][col] = 1;
+                if (structuringElement[i + 2][j + 2] == 1)
+                {
+                  if (input_image[row + i][col + j] == 0)
+                  {
+                    output_image[row][col] = 0;
+                  }
+                  else
+                  {
+                    output_image[row][col] = 1;
+                  }
+                }
               }
             }
           }
         }
       }
     }
-  
   } while (isCompleted(output_image));
 }
 
