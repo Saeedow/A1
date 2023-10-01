@@ -230,6 +230,7 @@ int isCompleted(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
     {
       if (input_image[row][col] == 1)
       {
+        cellDetection(input_image);
         return 1;
       }
     }
