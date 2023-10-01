@@ -9,7 +9,7 @@
 #include "cbmp.h"
 #include <time.h>
 
-int TH ;
+int TH;
 clock_t start, end;
 double cpu_time_used;
 int cells = 0;
@@ -31,7 +31,7 @@ int calculateThreshold(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHAN
     {
       // Calculate brightness as the average of the RGB channels
       int brightness = (input_image[row][col][0] + input_image[row][col][1] + input_image[row][col][2]) / 3;
-      histogram[brightness]=histogram[brightness]+1 ;
+      histogram[brightness] = histogram[brightness] + 1;
       sum += brightness;
     }
   }
@@ -59,7 +59,8 @@ int calculateThreshold(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHAN
       sum2 += i * histogram[i];
     }
 
-    if (w1 == 0 || w2 == 0){
+    if (w1 == 0 || w2 == 0)
+    {
       continue;
     }
 
@@ -78,12 +79,11 @@ int calculateThreshold(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHAN
   return threshold;
 }
 
-
 // Function to invert pirowels of an image (negative)
 void invertAndConvertToBinaryColors(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH])
 {
-  TH=calculateThreshold(input_image);
-  //converting to grey-scale using the calculated TH
+  TH = calculateThreshold(input_image);
+  // converting to grey-scale using the calculated TH
   for (int row = 0; row < BMP_WIDTH; row++)
   {
     for (int col = 0; col < BMP_HEIGTH; col++)
@@ -119,7 +119,7 @@ void converTo3D(unsigned char twoD[BMP_WIDTH][BMP_HEIGTH], unsigned char threeD[
 void generateOutputImage(int row, int col)
 {
   cells++;
- //draw the plus signs on the gived row/col
+  // draw the plus signs on the gived row/col
 
   for (int i = -6; i <= 6; i++)
   {
@@ -130,7 +130,6 @@ void generateOutputImage(int row, int col)
       iinput_image[row + i][col][2] = 0;
     }
   }
-
 
   for (int i = -6; i <= 6; i++)
   {
@@ -145,10 +144,27 @@ void generateOutputImage(int row, int col)
 
 void cellDetection(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
 {
-  //boolean set to false
-  int exclusionFrameClear = 0;
-  int cellDetected = 0;
-  //loop through the image until we find a white pixel
+  int frameSize = 18;
+  int structuringElement[18][18] = {
+      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+      {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+      {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+      {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+      {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+      {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+      {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+      {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+      {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+      {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+      {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+      {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+      {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+      {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+      {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+      {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+      {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
+
   for (int row = 0; row < BMP_HEIGTH; row++)
   {
     for (int col = 0; col < BMP_WIDTH; col++)
@@ -157,55 +173,48 @@ void cellDetection(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
 
       if (input_image[row][col] == 1)
       {
-        //looping through the detection frame 
-        for (int i = -6; i <= 6; i++)
+        int exclusionFrameClear = 1;
+
+        for (int i = -frameSize / 2; i <= frameSize / 2; i++)
         {
-          for (int j = -6; j <= 6; j++)
+          for (int j = -frameSize / 2; j <= frameSize / 2; j++)
           {
             if (row + i >= 0 && row + i <= BMP_HEIGTH && col + j >= 0 && col + j <= BMP_WIDTH)
             {
-              //if there is any white pixels we check the exclusion frame
-              if (input_image[row + i][col + j] == 1)
+              if (input_image[row + i][col + j] == 1 && structuringElement[i + frameSize / 2][j + frameSize / 2] == 0)
               {
-                exclusionFrameClear = 1;
-
-                for (int a = 1; a <= 14; a++)
-                {
-                  if (input_image[row - 7][col - 7 + a] != 0 || input_image[row - 7 + a][col + 7] != 0 || input_image[row - 7 + a][col - 7] != 0 || input_image[row + 7][col - 7 + a] != 0)
-                  {
-                    exclusionFrameClear = 0;
-                  }
-                }
-
-              
+                exclusionFrameClear = 0;
+                break;
               }
             }
           }
+          // break out of the outer loop
+          if (exclusionFrameClear == 0)
+          {
+            break;
+          }
         }
-        //invert the pixels in the detection frame
+
         if (exclusionFrameClear)
         {
           cellDetected = 1;
 
-          for (int x = -6; x <= 6; x++)
+          for (int i = -frameSize / 2; i <= frameSize / 2; i++)
           {
-            for (int y = -6; y <= 6; y++)
+            for (int j = -frameSize / 2; j <= frameSize / 2; j++)
             {
-              if (row + x >= 0 && row + x <= BMP_HEIGTH && col + y >= 0 && col + y <= BMP_WIDTH)
+              if (row + i >= 0 && row + i <= BMP_HEIGTH && col + j >= 0 && col + j <= BMP_WIDTH)
               {
-                input_image[row + x][col + y] = 0;
+                input_image[row + i][col + j] = 0;
               }
             }
           }
         }
-        exclusionFrameClear = 0;
-        //draw the + sign on the detected cells
+
         if (cellDetected)
         {
-          
-          printf("the row is: %d,  the col: %d \n ", row, col);
-          generateOutputImage(row+5, col-2);
-          
+          printf("Cell detected at row: %d, col: %d\n", row, col);
+          generateOutputImage(row + 5, col - 2);
         }
       }
     }
@@ -214,14 +223,13 @@ void cellDetection(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
 
 int isCompleted(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
 {
-  //looping through the image to check if there are any white pixels
+  // looping through the image to check if there are any white pixels
   for (int row = 0; row < BMP_WIDTH; row++)
   {
     for (int col = 0; col < BMP_HEIGTH; col++)
     {
       if (input_image[row][col] == 1)
       {
-        cellDetection(input_image);
         return 1;
       }
     }
@@ -231,34 +239,32 @@ int isCompleted(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH])
 
 void erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH])
 {
-  //initializing the structual element 
-int structuringElement[5][5] = {
-  {0, 1, 1, 1, 0},
-  {1, 1, 1, 1, 1},
-  {1, 1, 1, 1, 1},
-  {1, 1, 1, 1, 1},
-  {0, 1, 1, 1, 0}
-};
-
-
+  // initializing the structual element
+  int frameSize = 5;
+  int structuringElement[5][5] = {
+      {0, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {0, 1, 1, 1, 0}};
 
   do
   {
-    //look for white pixels
+    // look for white pixels
     for (int row = 0; row < BMP_WIDTH; row++)
     {
       for (int col = 0; col < BMP_HEIGTH; col++)
       {
-        //run the erosion algorithm 
+        // run the erosion algorithm
         if (input_image[row][col] == 1)
         {
-          for (int i = -2; i <= 2; i++)
+          for (int i = -frameSize / 2; i <= frameSize / 2; i++)
           {
-            for (int j = -2; j <= 2; j++)
+            for (int j = -frameSize / 2; j <= frameSize / 2; j++)
             {
               if (row + i >= 0 && row + i < BMP_WIDTH && col + j >= 0 && col + j < BMP_HEIGTH)
               {
-                if (structuringElement[i + 2][j + 2] == 1)
+                if (structuringElement[i + frameSize / 2][j + frameSize / 2] == 1)
                 {
                   if (input_image[row + i][col + j] == 0)
                   {
@@ -275,6 +281,7 @@ int structuringElement[5][5] = {
         }
       }
     }
+
   } while (isCompleted(output_image));
 }
 
@@ -316,6 +323,6 @@ int main(int argc, char **argv)
   printf("Total time: %f ms\n", cpu_time_used * 1000.0 /
                                     CLOCKS_PER_SEC);
 
-   printf("cells: %d", cells);
+  printf("cells: %d", cells);
   return 0;
 }
