@@ -329,6 +329,6 @@ int main(int argc, char **argv)
   printf("Total time: %f ms\n", cpu_time_used * 1000.0 /
                                     CLOCKS_PER_SEC);
 
-  printf("cells: %d", cells);
+  printf("cells: %d", cpu_time_used);
   return 0;
 }
